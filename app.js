@@ -393,7 +393,7 @@ class Host {
     if (btn) btn.disabled = true;
     try { await this.store.update(this.code, updates); }
     catch (e) { console.error(e); if (btn) btn.disabled = false; }
-    finally { this.busy = false; }
+    finally { this.busy = false; if (this.room) this.render(); }
   }
 
   /* --- рендер --- */
@@ -857,12 +857,13 @@ class Player {
         nameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !joinBtn.disabled) joinBtn.click(); });
         joinBtn.onclick = async () => {
           const name = nameInput.value.trim().slice(0, 16);
-          if (!picked || !name) return;
+          const cat = picked;   // фиксируем до await: refresh() сбросит picked, когда кот станет «занят» нами же
+          if (!cat || !name) return;
           joinBtn.disabled = true;
           const playerId = this.me?.playerId || genId();
           try {
-            await this.store.set(this.code, `players/${playerId}`, { name, cat: picked, joinedAt: this.store.ts(), xp: 0 });
-            this.saveMe({ playerId, name, cat: picked });
+            await this.store.set(this.code, `players/${playerId}`, { name, cat, joinedAt: this.store.ts(), xp: 0 });
+            this.saveMe({ playerId, name, cat });
             this.displayedXp = 0;
             this.render();   // подписка могла сработать раньше, чем сохранился me
           } catch (e) { console.error(e); joinBtn.disabled = false; }
@@ -1029,7 +1030,7 @@ class Player {
         if (!reduced() && (this.displayedXp ?? 0) < (me.xp || 0)) setTimeout(() => confetti(16), 200);
         const update = () => { const m = this.mine; if (m) this.syncXp(node, m.xp || 0, isAuthor ? 'yellow' : 'lime'); };
         setTimeout(update, 350);
-        return { node, update: () => {} };
+        return { node, update };
       },
 
       /* ---------- Инструкция ---------- */
