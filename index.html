@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+  <title>T&amp;D Internet Energy</title>
+  <meta name="description" content="Онлайн-игра команды T&D: same team, new level.">
+  <meta name="theme-color" content="#F5F0E8">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="assets/cats/emoji_u1f63c.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@700&family=Caveat:wght@600&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="net-banner hidden" id="net-banner"></div>
+
+  <!-- Ведущий: сцена 1920×1080, масштабируется под окно -->
+  <section data-screen="host" class="host hidden">
+    <div class="host-viewport">
+      <div class="host-stage" id="host-stage"><div class="host-shaker" id="host-shaker"></div></div>
+    </div>
+  </section>
+
+  <!-- Участник: телефон -->
+  <section data-screen="player" class="phone hidden">
+    <div class="phone-wrap" id="player-root"></div>
+  </section>
+
+  <!-- Галерея по прямой ссылке -->
+  <section data-screen="gallery" class="phone hidden">
+    <div class="gallery-page" id="gallery-root"></div>
+  </section>
+
+  <!-- Пустой адрес -->
+  <section data-screen="index" class="phone hidden">
+    <div class="index-page" id="index-root"></div>
+  </section>
+
+  <script src="assets/vendor/qrcode.min.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
