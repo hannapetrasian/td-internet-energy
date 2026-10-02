@@ -1170,6 +1170,10 @@ async function main() {
     for (const s of document.querySelectorAll('[data-screen]')) s.classList.toggle('hidden', s.dataset.screen !== name);
   };
 
+  // Пока грузится SDK, страница не должна быть пустой
+  show('index');
+  $('#index-root').innerHTML = `<div class="inner"><span class="label">${TEXT.title}</span><p class="body muted">Загружаю…</p></div>`;
+
   let store;
   try {
     store = demo ? (await import('./demo.js')).createDemoStore(params) : await createFirebaseStore();
