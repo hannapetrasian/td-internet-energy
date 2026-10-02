@@ -864,6 +864,7 @@ class Player {
             await this.store.set(this.code, `players/${playerId}`, { name, cat: picked, joinedAt: this.store.ts(), xp: 0 });
             this.saveMe({ playerId, name, cat: picked });
             this.displayedXp = 0;
+            this.render();   // подписка могла сработать раньше, чем сохранился me
           } catch (e) { console.error(e); joinBtn.disabled = false; }
         };
         return { node, update: refresh };
