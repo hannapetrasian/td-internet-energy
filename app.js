@@ -1206,7 +1206,7 @@ async function main() {
 
   let store;
   try {
-    store = demo ? (await import('./demo.js?v=4')).createDemoStore(params) : await createFirebaseStore();
+    store = demo ? (await import('./demo.js?v=4')).createDemoStore(params, computeNext) : await createFirebaseStore();
   } catch (e) {
     console.error(e);
     show('index');

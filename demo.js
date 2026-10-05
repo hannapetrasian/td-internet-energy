@@ -2,8 +2,8 @@
 // Фиктивная комната с пятью игроками. Стрелка → двигает фазы, ← возвращает.
 // Можно открыть сразу нужную фазу: ?host&demo&phase=whois_reveal&step=3
 
-import { computeNext } from './app.js?v=3';
-import { SCALES } from './content.js?v=3';
+// computeNext приходит из app.js параметром: без обратного импорта app.js не может загрузиться дважды
+import { SCALES } from './content.js?v=4';
 
 const PLAYERS = {
   p1: { name: 'Наташа', cat: 'grin',   joinedAt: 1, xp: 0 },
@@ -55,7 +55,7 @@ function makeVotes(order) {
 
 const PHASES = ['lobby', 'scales', 'whois_input', 'whois_vote', 'whois_reveal', 'manual_input', 'gallery', 'end'];
 
-export function createDemoStore(params) {
+export function createDemoStore(params, computeNext) {
   const code = 'TEST';
   const phase = PHASES.includes(params.get('phase')) ? params.get('phase') : 'lobby';
   const step = Number(params.get('step') || 0);
