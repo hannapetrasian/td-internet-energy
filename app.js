@@ -1,7 +1,7 @@
 // T&D Internet Energy — роутинг, состояние, подписки, рендер фаз.
 // Статика без сборщика. ESM. Firebase подключается динамически, демо-режим без сети.
 
-import { SCALES, WHOIS, MANUAL, CATS, CAT_BY_ID, MAX_PLAYERS, PHASE_ACCENT, TEXT } from './content.js?v=3';
+import { SCALES, WHOIS, MANUAL, CATS, CAT_BY_ID, MAX_PLAYERS, PHASE_ACCENT, TEXT } from './content.js?v=4';
 
 /* ============================================================
    Утилиты
@@ -58,7 +58,7 @@ function catSticker(catId, { size, key = catId, cls = '', pop = null, splash = n
   const cat = CAT_BY_ID[catId] || CATS[0];
   const style = `--tilt:${tiltFor('cat:' + key)}deg;${size ? `--size:${size}px;` : ''}${pop !== null ? `--i:${pop};` : ''}`;
   const splashEl = splash ? `<span class="splash ${splash === 'blob' ? 'blob' : ''}" style="--splash-rot:${tiltFor('splash:' + key, 20)}deg"></span>` : '';
-  return `<span class="sticker cat ${cls} ${pop !== null ? 'pop' : ''} ${idle ? 'idle' : ''}" style="${style}">${splashEl}<img src="assets/cats/${cat.file}" alt="${cat.emoji}" draggable="false"></span>`;
+  return `<span class="sticker cat ${cls} ${cat.baked ? 'photo' : ''} ${pop !== null ? 'pop' : ''} ${idle ? 'idle' : ''}" style="${style}">${splashEl}<img src="assets/cats/${cat.file}" alt="${cat.emoji}" draggable="false"></span>`;
 }
 
 function tag(text, color = '', key = text, extra = '') {
@@ -158,7 +158,7 @@ function flyTag(container, text, color) {
    ============================================================ */
 
 async function createFirebaseStore() {
-  const { firebaseConfig } = await import('./config.js?v=3');
+  const { firebaseConfig } = await import('./config.js?v=4');
   const [{ initializeApp }, db] = await Promise.all([
     import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
     import('https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js'),
@@ -269,7 +269,7 @@ function fitHostStage() {
 
 function hostTop({ code, mid = '' }) {
   return `<div class="h-top">
-    <div class="brand"><span class="label">${TEXT.title}</span></div>
+    <div class="brand"><span class="label">${TEXT.brand}</span></div>
     <div class="mid">${mid}</div>
     <div class="right">${code ? `<span class="room-chip">ROOM ${esc(code)}</span>` : ''}</div>
   </div>`;
@@ -442,15 +442,15 @@ class Host {
       lobby(room) {
         const code = this.code;
         const node = el(`<div class="screen">
-          ${hostTop({ code, mid: tag('LOBBY', 'surprise', 'lobby-tag') })}
+          ${hostTop({ code: null, mid: tag('LOBBY', 'surprise', 'lobby-tag') })}
           <div class="h-main"><div class="h-lobby">
             <div class="left">
               <div class="title-wrap">
-                <h1 class="display">T&amp;D<br>INTERNET<br>ENERGY</h1>
-                ${doodle('oval', 'left:-44px;top:186px;width:410px;height:160px', 'draw')}
+                <h1 class="display">${TEXT.titleLines.map(esc).join('<br>')}</h1>
+                ${doodle('oval', 'left:-50px;top:150px;width:460px;height:200px', 'draw')}
                 ${hand(TEXT.lobby.tagline, -4)}
-                ${doodle('star', 'left:430px;top:-30px;width:72px;height:72px', 'surprise twinkle')}
-                ${doodle('heart', 'left:880px;top:214px;width:36px;height:36px', 'accent float')}
+                ${doodle('star', 'left:470px;top:-30px;width:72px;height:72px', 'surprise twinkle')}
+                ${doodle('heart', 'left:900px;top:140px;width:36px;height:36px', 'accent float')}
               </div>
               <div class="code-wrap">
                 <span class="label muted">Код комнаты</span>
@@ -751,7 +751,7 @@ class Host {
    ============================================================ */
 
 function playerTop(mid = '') {
-  return `<div class="p-top"><div class="brand"><span class="label">${TEXT.title}</span></div><div class="right">${mid}</div></div>`;
+  return `<div class="p-top"><div class="brand"><span class="label">${TEXT.brand}</span></div><div class="right">${mid}</div></div>`;
 }
 
 class Player {
@@ -1144,7 +1144,7 @@ async function renderGalleryPage(store, code) {
   const players = sortedPlayers(room?.players);
   root.innerHTML = `
     <div class="head">
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span class="label">${TEXT.title}</span>${tag(TEXT.gallery.pageTag, 'yellow', 'teamtag')}</div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span class="label">${TEXT.brand}</span>${tag(TEXT.gallery.pageTag, 'yellow', 'teamtag')}</div>
       <h1 class="display">${TEXT.gallery.pageTitle}</h1>
       ${hand(TEXT.gallery.sureWhyNot, -3, 'align-self:start')}
     </div>
@@ -1162,6 +1162,7 @@ function renderIndex() {
   setAccent('lobby');
   $('#index-root').innerHTML = `<div class="inner">
     ${doodle('star', 'right:-30px;top:-30px;width:56px;height:56px', 'surprise')}
+    <span class="label">${TEXT.brand}</span>
     <h1 class="display">${TEXT.title}</h1>
     ${hand(TEXT.lobby.tagline, -3)}
     <p class="body">Ведущий открывает <code>?host</code>, участники заходят по ссылке или QR с экрана.</p>
@@ -1201,11 +1202,11 @@ async function main() {
 
   // Пока грузится SDK, страница не должна быть пустой
   show('index');
-  $('#index-root').innerHTML = `<div class="inner"><span class="label">${TEXT.title}</span><p class="body muted">Загружаю…</p></div>`;
+  $('#index-root').innerHTML = `<div class="inner"><span class="label">${TEXT.brand}</span><p class="body muted">Загружаю…</p></div>`;
 
   let store;
   try {
-    store = demo ? (await import('./demo.js?v=3')).createDemoStore(params) : await createFirebaseStore();
+    store = demo ? (await import('./demo.js?v=4')).createDemoStore(params) : await createFirebaseStore();
   } catch (e) {
     console.error(e);
     show('index');
