@@ -55,7 +55,19 @@ function makeVotes(order) {
 
 const PHASES = ['lobby', 'scales', 'whois_input', 'whois_vote', 'whois_reveal', 'manual_input', 'gallery', 'end'];
 
+// Воспроизведение реальной комнаты из JSON-выгрузки Firebase: ?host&demo&replay=LGZR&phase=...&step=...
+export async function createReplayStore(params, computeNext) {
+  const code = params.get('replay').toUpperCase();
+  const room = await (await fetch(`./replay-${code}.json`)).json();
+  const phase = PHASES.includes(params.get('phase')) ? params.get('phase') : room.meta.phase;
+  const step = params.has('step') ? Number(params.get('step')) : (room.meta.step || 0);
+  room.meta.phase = phase; room.meta.step = step;
+  if (phase === 'scales') room.meta.shown = params.get('shown') !== '0';
+  return makeStore(room, code, params, computeNext);
+}
+
 export function createDemoStore(params, computeNext) {
+  if (params.has('replay')) return createReplayStore(params, computeNext);
   const code = 'TEST';
   const phase = PHASES.includes(params.get('phase')) ? params.get('phase') : 'lobby';
   const step = Number(params.get('step') || 0);
@@ -93,6 +105,10 @@ export function createDemoStore(params, computeNext) {
     if (voters.length > 1) delete v[voters[voters.length - 1]];
   }
 
+  return makeStore(room, code, params, computeNext);
+}
+
+function makeStore(room, code, params, computeNext) {
   // Участник демо — Ася (p4), если ещё не вошла. &fresh — экран входа заново.
   if (params.has('fresh')) localStorage.removeItem(`tdie.player.${code}`);
   if (!params.has('host') && !params.has('fresh') && !localStorage.getItem(`tdie.player.${code}`)) {
