@@ -1,7 +1,7 @@
 // T&D Internet Energy — роутинг, состояние, подписки, рендер фаз.
 // Статика без сборщика. ESM. Firebase подключается динамически, демо-режим без сети.
 
-import { SCALES, WHOIS, MANUAL, CATS, CAT_BY_ID, MAX_PLAYERS, PHASE_ACCENT, TEXT } from './content.js?v=4';
+import { SCALES, WHOIS, MANUAL, CATS, CAT_BY_ID, MAX_PLAYERS, PHASE_ACCENT, TEXT } from './content.js?v=5';
 
 /* ============================================================
    Утилиты
@@ -41,6 +41,14 @@ function sortedPlayers(players) {
   return Object.entries(players || {})
     .map(([id, p]) => ({ id, ...p }))
     .sort((a, b) => (a.joinedAt || 0) - (b.joinedAt || 0));
+}
+
+// Титул в финале: порядок игроков по входу, сдвиг по коду комнаты, без повторов внутри комнаты
+function titleFor(players, pid, code) {
+  const list = sortedPlayers(players);
+  const idx = Math.max(0, list.findIndex((p) => p.id === pid));
+  const shift = Math.floor(hash('titles:' + code) * TEXT.end.titles.length);
+  return TEXT.end.titles[(idx + shift) % TEXT.end.titles.length];
 }
 
 function setAccent(phase) {
@@ -158,7 +166,7 @@ function flyTag(container, text, color) {
    ============================================================ */
 
 async function createFirebaseStore() {
-  const { firebaseConfig } = await import('./config.js?v=4');
+  const { firebaseConfig } = await import('./config.js?v=5');
   const [{ initializeApp }, db] = await Promise.all([
     import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
     import('https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js'),
@@ -638,7 +646,7 @@ class Host {
               ${voters.map((v, i) => `<div class="avatar ${animate ? 'pop' : ''}" style="--i:${i + 2}">${catSticker(v.p.cat, { size: 120, key: v.p.id })}${tag(v.ok ? '+10 XP' : 'NOPE', v.ok ? 'lime' : 'coral', 'vote' + step + v.id)}<div class="name">${esc(v.p.name || '')}</div></div>`).join('')}
             </div>
           </div>`;
-          $('.status', node).innerHTML = hand(TEXT.whois.keepCalm, -3);
+          $('.status', node).innerHTML = '';
           if (animate) confetti();
         };
         const update = (room) => {
@@ -665,11 +673,11 @@ class Host {
           ${hostTop({ code: this.code, mid: tag('FINAL ROUND', 'surprise', 'final') })}
           <div class="h-main"><div class="h-manual">
             <div class="left">
-              <h1 class="display">${TEXT.manual.title}</h1>
-              ${hand(TEXT.manual.tagline, -3, 'justify-self:start')}
-              ${doodle('underline', 'left:4px;top:232px;width:330px;height:34px', 'accent draw')}
-              ${doodle('heart', 'left:420px;top:250px;width:54px;height:54px', 'surprise float')}
-              ${doodle('sparkle-cluster', 'left:60px;top:330px;width:120px;height:100px', 'surprise twinkle')}
+              <div style="position:relative;display:inline-block">
+                <h1 class="display">${TEXT.manual.title}</h1>
+                ${doodle('underline', 'left:4px;bottom:-30px;width:420px;height:34px', 'accent draw')}
+                ${doodle('sparkle-cluster', 'right:-130px;top:-40px;width:120px;height:100px', 'surprise twinkle')}
+              </div>
             </div>
             <div class="list">
               ${MANUAL.map((m, i) => `<div class="card">${tag(pad2(i + 1), 'ink', 'm' + i)}<span>${esc(m.label)}</span></div>`).join('')}
@@ -709,36 +717,35 @@ class Host {
       /* ---------- Финал ---------- */
       end(room) {
         const code = this.code;
-        const players = sortedPlayers(room.players).sort((a, b) => (b.xp || 0) - (a.xp || 0));
+        const players = sortedPlayers(room.players);
         const node = el(`<div class="screen">
           ${hostTop({ code, mid: tag('GAME OVER', 'surprise', 'over') })}
           <div class="h-main"><div class="h-end">
-            <div class="left">
-              <div style="position:relative;display:inline-block">
-                <h1 class="display">${TEXT.end.title}</h1>
-                ${doodle('crown', 'right:-70px;top:-60px;width:80px;height:70px', 'surprise twinkle')}
-                ${doodle('heart', 'right:-150px;top:10px;width:44px;height:44px', 'accent float')}
+            <div class="head">
+              <div class="titles">
+                <div style="position:relative;display:inline-block">
+                  <h1 class="display">${TEXT.end.title}</h1>
+                  ${doodle('crown', 'right:-40px;top:-70px;width:80px;height:70px', 'surprise twinkle')}
+                  ${doodle('heart', 'right:-110px;top:40px;width:44px;height:44px', 'accent float')}
+                </div>
+                ${hand(TEXT.end.goodIdea, 2, 'justify-self:start')}
               </div>
-              ${hand(TEXT.end.goodIdea, 2, 'justify-self:start')}
-              <div class="table">
-                ${players.map((p, i) => `<div class="card trow pop" style="--i:${i}">
-                  <div class="rank">${pad2(i + 1)}</div>
-                  ${catSticker(p.cat, { size: 96, key: p.id })}
-                  <div class="nm">${esc(p.name)}</div>
-                  <div class="xp">${p.xp || 0} XP</div>
-                  ${tag(`${TEXT.end.chaos}: ${i === 0 ? 100 : pick('chaos' + p.id, 60, 99)}%`, i === 0 ? 'surprise' : 'lavender', 'chaos' + p.id)}
-                </div>`).join('')}
+              <div class="right">
+                <div class="card qr-card"><canvas class="qr" width="150" height="150"></canvas></div>
+                <div><span class="label">${esc(TEXT.end.gallery)}</span><div class="url">${esc(shortUrl(code, '&gallery'))}</div></div>
               </div>
             </div>
-            <div class="right">
-              <span class="label">${esc(TEXT.end.gallery)}</span>
-              <div class="card qr-card"><canvas class="qr" width="240" height="240"></canvas></div>
-              <div class="url">${esc(shortUrl(code, '&gallery'))}</div>
+            <div class="team">
+                ${players.map((p, i) => `<div class="member pop" style="--i:${i}">
+                  ${catSticker(p.cat, { size: 200, key: p.id, splash: i % 2 ? 'blob' : 'burst', idle: true })}
+                  <div class="nm">${esc(p.name)}</div>
+                  ${tag(titleFor(room.players, p.id, code), i % 2 ? 'lavender' : 'surprise', 'title' + p.id)}
+                </div>`).join('')}
             </div>
           </div></div>
-          ${hostBottom({ status: '' })}
+          ${hostBottom({ status: `<span class="body">${esc(TEXT.end.thanks)}</span>` })}
         </div>`);
-        drawQr($('.qr', node), roomUrl(code, '&gallery'), 240);
+        drawQr($('.qr', node), roomUrl(code, '&gallery'), 150);
         setTimeout(() => confetti(), 300);
         return { node, update: () => {} };
       },
@@ -923,17 +930,19 @@ class Player {
         const step = meta.step || 0, sc = SCALES[step], me = this.mine;
         const node = this.frame({
           mid: tag(`ROUND ${pad2(step + 1)} / ${pad2(SCALES.length)}`, 'surprise', 'r' + step),
-          main: `<h1 class="display sm">${esc(sc.q)}</h1>
+          main: `<div class="p-scale-head"><h1 class="display sm">${esc(sc.q)}</h1>${hand(TEXT.scales.noRight, -2)}</div>
             <div class="p-scale">
               <div class="ends"><div class="end l">${esc(sc.left)}</div><div class="end r">${esc(sc.right)}</div></div>
               <input type="range" class="range" min="0" max="100" value="50" aria-label="${esc(sc.q)}">
+              <div class="pick-hint label muted">Передвинь ползунок</div>
               <div class="state" style="min-height:60px;display:grid;place-items:center"></div>
             </div>`,
           bottom: `<button class="btn block done">${esc(TEXT.scales.done)}</button>`,
         });
         const range = $('.range', node), btn = $('.done', node), state = $('.state', node);
+        range.addEventListener('input', () => { $('.pick-hint', node)?.classList.add('hidden'); }, { once: true });
         const lock = (v) => {
-          range.value = v; range.disabled = true; btn.classList.add('hidden');
+          range.value = v; range.disabled = true; btn.classList.add('hidden'); $('.pick-hint', node)?.classList.add('hidden');
           state.innerHTML = `${tag(TEXT.scales.gotIt, 'surprise', 'got' + step)}<div class="body muted" style="margin-top:14px;font-size:15px">${esc(TEXT.scales.wait)}</div>`;
           $('.tag', state).classList.add('pop');
         };
@@ -1068,7 +1077,6 @@ class Player {
         const node = this.frame({
           mid: tag('FINAL ROUND', 'surprise', 'final'),
           main: `<h1 class="display sm">${TEXT.manual.title}</h1>
-            ${hand(TEXT.manual.tagline, -2, 'align-self:flex-start')}
             <div class="p-fields">
               ${MANUAL.map((m) => `<label class="field"><span class="body" style="font-weight:600">${esc(m.label)}</span><input class="input f" data-k="${m.key}" maxlength="120" autocomplete="off"></label>`).join('')}
               <div class="state"></div>
@@ -1111,17 +1119,15 @@ class Player {
       /* ---------- Финал ---------- */
       end() {
         const me = this.mine;
-        const ranked = sortedPlayers(this.players).sort((a, b) => (b.xp || 0) - (a.xp || 0));
-        const place = ranked.findIndex((p) => p.id === me.id) + 1;
         const node = this.frame({
           mid: tag('GAME OVER', 'surprise', 'over'),
-          main: `<div class="p-center">
+          main: `<div class="p-center" style="gap:18px">
             ${doodle('crown', 'right:-4px;top:-58px;width:56px;height:50px', 'surprise')}
             <h1 class="display">${TEXT.end.title}</h1>
-            <div class="avatar pop">${catSticker(me.cat, { size: 150, key: me.id, splash: 'blob', idle: true })}${tag(`${TEXT.end.chaos}: ${place === 1 ? 100 : pick('chaos' + me.id, 60, 99)}%`, place === 1 ? 'surprise' : 'lavender', 'chaos' + me.id)}</div>
-            <div class="xp-big">${me.xp || 0} XP</div>
-            <div class="body">Место ${place} из ${ranked.length}</div>
-            ${hand(TEXT.end.goodIdea, -3)}
+            <div class="avatar pop" style="margin-top:10px">${catSticker(me.cat, { size: 220, key: me.id, splash: 'blob', idle: true })}</div>
+            <div class="body" style="font-weight:800;font-size:22px">${esc(me.name)}</div>
+            ${tag(titleFor(this.players, me.id, this.code), 'surprise', 'title' + me.id, 'lg')}
+            ${hand(TEXT.end.goodIdea, -3, 'margin-top:14px')}
           </div>`,
           bottom: `<a class="btn block" target="_blank" rel="noopener" href="${esc(roomUrl(this.code, '&gallery'))}">${esc(TEXT.gallery.open)}</a>`,
         });
@@ -1206,7 +1212,7 @@ async function main() {
 
   let store;
   try {
-    store = demo ? (await import('./demo.js?v=4')).createDemoStore(params, computeNext) : await createFirebaseStore();
+    store = demo ? (await import('./demo.js?v=5')).createDemoStore(params, computeNext) : await createFirebaseStore();
   } catch (e) {
     console.error(e);
     show('index');

@@ -94,7 +94,7 @@ export const TEXT = {
     voted: 'VOTED',
     votedCount: 'ПРОГОЛОСОВАЛИ',
     reveal: 'Раскрыть',
-    yours: 'это твой ответ. сиди спокойно',
+    yours: 'это твой ответ. жди, пока угадают',
     author: 'АВТОР',
     tell: (name) => `${name}, 30 секунд: расскажи, откуда это`,
     guessed: 'Угадано!',
@@ -107,7 +107,7 @@ export const TEXT = {
   },
   manual: {
     title: 'ИНСТРУКЦИЯ ПО РАБОТЕ СО МНОЙ',
-    tagline: 'честно, но дружелюбно',
+    tagline: '',   // рукописной фразы на этом экране нет
     wrote: 'НАПИСАЛИ',
     save: 'Сохранить',
     saved: 'SAVED',
@@ -119,13 +119,15 @@ export const TEXT = {
     pageTitle: 'ИНСТРУКЦИЯ ПО РАБОТЕ СО МНОЙ',
     pageTag: 'TEAM T&D',
     empty: 'Пока пусто. Карточки появятся после игры.',
-    sureWhyNot: 'sure, why not',
+    sureWhyNot: 'шпаргалка по команде',
   },
   end: {
-    title: 'SOMEHOW WE DID IT',
-    chaos: 'CHAOS LEVEL',
+    title: 'ТЕПЕРЬ ТОЧНО СВОИ',
+    // Титулы в финале: каждому свой, без мест и очков. Порядок сдвигается по коду комнаты.
+    titles: ['T&D LEGEND', 'EMERGING LOVE', 'CHIEF VIBE OFFICER', 'HEAD OF GOOD IDEAS', 'TEAM ENERGY SOURCE', 'OFFICIALLY ONE OF US', 'CERTIFIED TEAMMATE', 'LEARNING MODE: ON'],
+    thanks: 'Спасибо, что сыграли',
     gallery: 'Галерея',
-    goodIdea: 'this seemed like a good idea',
+    goodIdea: 'same team, new level',
   },
   offline: 'Нет связи, переподключаюсь',
   next: 'Дальше',
