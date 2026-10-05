@@ -1,7 +1,7 @@
 // T&D Internet Energy — роутинг, состояние, подписки, рендер фаз.
 // Статика без сборщика. ESM. Firebase подключается динамически, демо-режим без сети.
 
-import { SCALES, WHOIS, MANUAL, CATS, CAT_BY_ID, MAX_PLAYERS, PHASE_ACCENT, TEXT } from './content.js?v=6';
+import { SCALES, WHOIS, MANUAL, CATS, CAT_BY_ID, MAX_PLAYERS, PHASE_ACCENT, TEXT } from './content.js?v=7';
 
 /* ============================================================
    Утилиты
@@ -166,7 +166,7 @@ function flyTag(container, text, color) {
    ============================================================ */
 
 async function createFirebaseStore() {
-  const { firebaseConfig } = await import('./config.js?v=6');
+  const { firebaseConfig } = await import('./config.js?v=7');
   const [{ initializeApp }, db] = await Promise.all([
     import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
     import('https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js'),
@@ -337,7 +337,6 @@ class Host {
       <div class="h-main"><div class="h-start"><div class="inner">
         ${doodle('star', 'left:-120px;top:-40px;width:70px;height:70px', 'surprise')}
         <h1 class="display xl">${TEXT.title}</h1>
-        ${hand(TEXT.lobby.tagline, -3)}
         <button class="btn create">${esc(TEXT.lobby.create)}</button>
         <div class="restore">
           <div class="label" style="margin-bottom:12px;opacity:.7">${esc(TEXT.lobby.restoreLabel)}</div>
@@ -456,7 +455,6 @@ class Host {
               <div class="title-wrap">
                 <h1 class="display">${TEXT.titleLines.map(esc).join('<br>')}</h1>
                 ${doodle('oval', 'left:-50px;top:150px;width:460px;height:200px', 'draw')}
-                ${hand(TEXT.lobby.tagline, -4)}
                 ${doodle('star', 'left:470px;top:-30px;width:72px;height:72px', 'surprise twinkle')}
                 ${doodle('heart', 'left:900px;top:140px;width:36px;height:36px', 'accent float')}
               </div>
@@ -728,7 +726,6 @@ class Host {
                   ${doodle('crown', 'right:-40px;top:-70px;width:80px;height:70px', 'surprise twinkle')}
                   ${doodle('heart', 'right:-110px;top:40px;width:44px;height:44px', 'accent float')}
                 </div>
-                ${hand(TEXT.lobby.tagline, 2, 'justify-self:start')}
               </div>
               <div class="right">
                 <div class="card qr-card"><canvas class="qr" width="150" height="150"></canvas></div>
@@ -1170,7 +1167,6 @@ function renderIndex() {
     ${doodle('star', 'right:-30px;top:-30px;width:56px;height:56px', 'surprise')}
     <span class="label">${TEXT.brand}</span>
     <h1 class="display">${TEXT.title}</h1>
-    ${hand(TEXT.lobby.tagline, -3)}
     <p class="body">Ведущий открывает <code>?host</code>, участники заходят по ссылке или QR с экрана.</p>
     <a class="btn" href="?host">Я ведущий</a>
   </div>`;
@@ -1212,7 +1208,7 @@ async function main() {
 
   let store;
   try {
-    store = demo ? (await import('./demo.js?v=6')).createDemoStore(params, computeNext) : await createFirebaseStore();
+    store = demo ? (await import('./demo.js?v=7')).createDemoStore(params, computeNext) : await createFirebaseStore();
   } catch (e) {
     console.error(e);
     show('index');

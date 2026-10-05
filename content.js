@@ -57,7 +57,7 @@ export const TEXT = {
   title: 'СВОИ КОТЫ',                // название игры, большой заголовок лобби
   titleLines: ['СВОИ', 'КОТЫ'],      // то же, построчно для лобби ведущего
   lobby: {
-    tagline: 'cool team, cool cats',
+    tagline: '',   // рукописной фразы в лобби нет
     inGame: 'В ИГРЕ',
     start: 'Начать',
     needTwo: 'Нужно хотя бы двое',
