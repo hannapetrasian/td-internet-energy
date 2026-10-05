@@ -20,18 +20,20 @@ export const MANUAL = [
 ];
 
 export const CATS = [
-  { id: 'smirk',  file: 'emoji_u1f63c.svg',           emoji: '😼', label: 'INTERESTING...' },
-  { id: 'grin',   file: 'emoji_u1f638.svg',           emoji: '😸', label: 'CONFIDENCE: UNREASONABLE' },
-  { id: 'joy',    file: 'emoji_u1f639.svg',           emoji: '😹', label: 'NO REGRETS' },
-  { id: 'scream', file: 'emoji_u1f640.svg',           emoji: '🙀', label: 'WHAT?!' },
-  { id: 'cry',    file: 'emoji_u1f63f.svg',           emoji: '😿', label: "IT'S FINE..." },
-  { id: 'pout',   file: 'emoji_u1f63e.svg',           emoji: '😾', label: "LET'S CIRCLE BACK" },
-  { id: 'love',   file: 'emoji_u1f63b.svg',           emoji: '😻', label: 'TEAM SUPPORT' },
-  { id: 'smile',  file: 'emoji_u1f63a.svg',           emoji: '😺', label: 'GOOD VIBES ONLY' },
-  { id: 'kiss',   file: 'emoji_u1f63d.svg',           emoji: '😽', label: 'BE SERIOUS PLS' },
-  { id: 'face',   file: 'emoji_u1f431.svg',           emoji: '🐱', label: 'STATUS: QUESTIONABLE' },
-  { id: 'run',    file: 'emoji_u1f408.svg',           emoji: '🐈', label: 'ROCKET MODE' },
-  { id: 'black',  file: 'emoji_u1f408_200d_2b1b.svg', emoji: '🐈‍⬛', label: 'CHAOS LEVEL: 87%' },
+  // Фото-коты из коллажа Ханны (assets/cats/photo_*.png). Подпись уже нарисована на стикере (baked),
+  // поэтому отдельный лейбл под котом не показываем. label нужен для alt и списка.
+  { id: 'smirk',  file: 'photo_smirk.png',  emoji: '😼', label: 'INTERESTING...', baked: true },
+  { id: 'grin',   file: 'photo_grin.png',   emoji: '😸', label: 'TEAM LEARNING MODE: ON', baked: true },
+  { id: 'joy',    file: 'photo_joy.png',    emoji: '😹', label: 'STRETCH & LEARN', baked: true },
+  { id: 'scream', file: 'photo_scream.png', emoji: '🙀', label: 'WAIT... WHAT?', baked: true },
+  { id: 'cry',    file: 'photo_cry.png',    emoji: '😿', label: 'MONDAY ENERGY', baked: true },
+  { id: 'pout',   file: 'photo_pout.png',   emoji: '😾', label: 'THINK OUTSIDE THE BOX', baked: true },
+  { id: 'love',   file: 'photo_love.png',   emoji: '😻', label: 'HIGH FIVE!', baked: true },
+  { id: 'smile',  file: 'photo_smile.png',  emoji: '😺', label: 'GOOD VIBES', baked: true },
+  { id: 'kiss',   file: 'photo_kiss.png',   emoji: '😽', label: 'TEAM POWER', baked: true },
+  { id: 'face',   file: 'photo_face.png',   emoji: '🐱', label: 'YOU GOT THIS', baked: true },
+  { id: 'run',    file: 'photo_run.png',    emoji: '🐈', label: "LET'S GO!", baked: true },
+  { id: 'black',  file: 'photo_black.png',  emoji: '🐈‍⬛', label: 'TO THE NEXT LEVEL', baked: true },
 ];
 
 export const CAT_BY_ID = Object.fromEntries(CATS.map((c) => [c.id, c]));

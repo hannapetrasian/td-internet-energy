@@ -145,7 +145,7 @@ a { color: inherit; }
 .host { --o: 3px; --od: 2.25px; }
 
 .sticker.cat { position: relative; }
-.sticker.cat img { position: relative; width: var(--size, 96px); height: var(--size, 96px); }
+.sticker.cat img { position: relative; width: var(--size, 96px); height: var(--size, 96px); object-fit: contain; }
 .sticker.cat .splash {
   position: absolute;
   inset: -16%;
@@ -522,7 +522,7 @@ a { color: inherit; }
 .h-lobby .qr-card canvas, .h-lobby .qr-card img { width: 280px; height: 280px; }
 .h-lobby .qr-caption { margin-top: 14px; text-align: center; }
 .h-lobby .players { grid-column: 1 / -1; display: flex; gap: 48px; align-items: flex-end; min-height: 200px; padding-left: 8px; }
-.h-lobby .players .avatar { --size: 128px; }
+.h-lobby .players .avatar { --size: 168px; }
 
 /* Шкалы */
 .h-scales { display: grid; grid-template-rows: auto 1fr; gap: 24px; height: 100%; }
@@ -541,12 +541,12 @@ a { color: inherit; }
 .h-scales .pin {
   position: absolute;
   left: var(--x, 50%);
-  bottom: calc(22px + var(--lane, 0) * 48px);
+  bottom: calc(22px + var(--lane, 0) * 176px);   /* вторая полка выше стикера с именем, чтобы соседи не наезжали */
   transform: translateX(-50%);
   transition: left 700ms var(--ease-out);
   transition-delay: calc(var(--i, 0) * 120ms);
-  --size: 112px;
-  width: 180px;             /* фиксированная ширина: иначе у правого края абсолютный блок сжимается */
+  --size: 140px;
+  width: 190px;             /* фиксированная ширина: иначе у правого края абсолютный блок сжимается */
   display: flex;
   justify-content: center;
 }
@@ -577,7 +577,7 @@ a { color: inherit; }
 .h-reveal .author .display { font-size: 72px; }
 .h-reveal .author .tell { font-size: 28px; font-weight: 600; margin-top: 8px; max-width: 700px; }
 .h-reveal .voters { grid-column: 1 / -1; display: flex; gap: 36px; align-items: flex-end; justify-content: center; align-self: end; }
-.h-reveal .voters .avatar { --size: 104px; }
+.h-reveal .voters .avatar { --size: 120px; }
 .h-reveal .voters .avatar .name { font-size: 18px; }
 
 /* Инструкция */
@@ -615,7 +615,7 @@ a { color: inherit; }
 .h-end .table { display: grid; gap: 14px; margin-top: 12px; }
 .h-end .trow { display: grid; grid-template-columns: 64px 110px 1fr auto auto; align-items: center; gap: 24px; padding: 10px 24px 10px 12px; }
 .h-end .trow .rank { font-family: var(--font-display); font-size: 48px; opacity: 0.5; }
-.h-end .trow .avatar { --size: 84px; }
+.h-end .trow .avatar { --size: 96px; }
 .h-end .trow .nm { font-family: var(--font-display); font-size: 40px; text-transform: uppercase; }
 .h-end .trow .xp { font-family: var(--font-display); font-size: 44px; }
 .h-end .right { display: grid; justify-items: center; gap: 20px; align-content: start; }
@@ -649,13 +649,13 @@ a { color: inherit; }
 .p-bottom { margin-top: auto; display: grid; gap: 10px; padding-top: 8px; }
 .p-bottom .hint { text-align: center; font-size: 14px; opacity: 0.7; }
 
-.cat-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 8px; }
+.cat-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 4px; }
 .cat-grid .cat-tile {
   appearance: none; border: 0; background: transparent; padding: 10px 4px 12px;
   border-radius: 12px; display: grid; justify-items: center; gap: 4px;
   transition: transform 180ms var(--spring), opacity 180ms ease;
 }
-.cat-grid .cat-tile .sticker.cat { --size: 72px; }
+.cat-grid .cat-tile .sticker.cat { --size: 100px; }
 .cat-grid .cat-tile { min-width: 0; width: 100%; }
 .cat-grid .cat-tile .tag { font-size: 10px; display: block; width: 100%; }
 .cat-grid .cat-tile .tag .tag-in { padding: 5px 8px 4px; text-align: center; }

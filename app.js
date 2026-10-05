@@ -1,7 +1,7 @@
 // T&D Internet Energy — роутинг, состояние, подписки, рендер фаз.
 // Статика без сборщика. ESM. Firebase подключается динамически, демо-режим без сети.
 
-import { SCALES, WHOIS, MANUAL, CATS, CAT_BY_ID, MAX_PLAYERS, PHASE_ACCENT, TEXT } from './content.js';
+import { SCALES, WHOIS, MANUAL, CATS, CAT_BY_ID, MAX_PLAYERS, PHASE_ACCENT, TEXT } from './content.js?v=3';
 
 /* ============================================================
    Утилиты
@@ -70,7 +70,7 @@ function avatar(p, { size, color = '', name = true, label = true, pop = null, ke
   const cat = CAT_BY_ID[p.cat] || CATS[0];
   return `<div class="avatar ${pop !== null ? 'pop' : ''}" style="${pop !== null ? `--i:${pop};` : ''}" data-pid="${esc(p.id)}">
     ${catSticker(p.cat, { size, key })}
-    ${label ? tag(cat.label, color, key + ':label') : ''}
+    ${label && !cat.baked ? tag(cat.label, color, key + ':label') : ''}
     ${name ? `<div class="name">${esc(p.name)}</div>` : ''}
   </div>`;
 }
@@ -158,7 +158,7 @@ function flyTag(container, text, color) {
    ============================================================ */
 
 async function createFirebaseStore() {
-  const { firebaseConfig } = await import('./config.js');
+  const { firebaseConfig } = await import('./config.js?v=3');
   const [{ initializeApp }, db] = await Promise.all([
     import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
     import('https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js'),
@@ -517,13 +517,25 @@ class Host {
           if (!room.meta.shown) return;
           if (shownAt === null) shownAt = performance.now();
           const track = $('.track', node);
-          // раскладка: сортируем по значению, близкие (< 8%) поднимаем на следующую полку
+          // раскладка: коты стоят на своих значениях, но не наезжают друг на друга.
+          // Близкие (ближе ширины стикера) раздвигаем по горизонтали и чередуем две полки.
+          const trackW = track.clientWidth || 1680;
+          const minGap = 156;
           const sorted = answered.map((p) => ({ p, v: Number(answers[p.id]) })).sort((a, b) => a.v - b.v);
-          let prevV = -100, lane = 0;
-          const layout = sorted.map((it) => {
-            lane = it.v - prevV < 8 ? lane + 1 : 0;
-            prevV = it.v;
-            return { ...it, lane };
+          const xs = sorted.map((it) => (it.v / 100) * trackW);
+          for (let pass = 0; pass < 6; pass++) {
+            for (let i = 1; i < xs.length; i++) if (xs[i] - xs[i - 1] < minGap) xs[i] = xs[i - 1] + minGap;
+            const lo = minGap / 2, hi = trackW - minGap / 2;   // центр стикера не ближе половины ширины к краю
+            const over = xs.length ? xs[xs.length - 1] - hi : 0;
+            if (over > 0) for (let i = 0; i < xs.length; i++) xs[i] -= over;
+            for (let i = xs.length - 2; i >= 0; i--) if (xs[i + 1] - xs[i] < minGap) xs[i] = xs[i + 1] - minGap;
+            if (xs.length && xs[0] < lo) { const d = lo - xs[0]; for (let i = 0; i < xs.length; i++) xs[i] += d; }
+          }
+          let lane = 0;
+          const layout = sorted.map((it, i) => {
+            const close = i > 0 && xs[i] - xs[i - 1] < minGap + 24;
+            lane = close ? (lane ? 0 : 1) : 0;
+            return { ...it, x: (xs[i] / trackW) * 100, lane };
           });
           layout.forEach((it, i) => {
             let pin = track.querySelector(`.pin[data-pid="${it.p.id}"]`);
@@ -532,9 +544,9 @@ class Host {
               pin = el(`<div class="pin" data-pid="${esc(it.p.id)}" style="--x:50%;--i:${late ? 0 : i};--lane:${it.lane}">${avatar(it.p, { color: 'lavender', label: false, pop: late ? 0 : i })}</div>`);
               track.appendChild(pin);
               placed.add(it.p.id);
-              requestAnimationFrame(() => requestAnimationFrame(() => { pin.style.setProperty('--x', `${it.v}%`); }));
+              requestAnimationFrame(() => requestAnimationFrame(() => { pin.style.setProperty('--x', `${it.x}%`); }));
             } else {
-              pin.style.setProperty('--x', `${it.v}%`);
+              pin.style.setProperty('--x', `${it.x}%`);
               pin.style.setProperty('--lane', it.lane);
             }
           });
@@ -623,7 +635,7 @@ class Host {
               <div class="tell">${esc(TEXT.whois.tell(ap.name))}</div>
             </div>
             <div class="voters">
-              ${voters.map((v, i) => `<div class="avatar ${animate ? 'pop' : ''}" style="--i:${i + 2}">${catSticker(v.p.cat, { size: 104, key: v.p.id })}${tag(v.ok ? '+10 XP' : 'NOPE', v.ok ? 'lime' : 'coral', 'vote' + step + v.id)}<div class="name">${esc(v.p.name || '')}</div></div>`).join('')}
+              ${voters.map((v, i) => `<div class="avatar ${animate ? 'pop' : ''}" style="--i:${i + 2}">${catSticker(v.p.cat, { size: 120, key: v.p.id })}${tag(v.ok ? '+10 XP' : 'NOPE', v.ok ? 'lime' : 'coral', 'vote' + step + v.id)}<div class="name">${esc(v.p.name || '')}</div></div>`).join('')}
             </div>
           </div>`;
           $('.status', node).innerHTML = hand(TEXT.whois.keepCalm, -3);
@@ -711,7 +723,7 @@ class Host {
               <div class="table">
                 ${players.map((p, i) => `<div class="card trow pop" style="--i:${i}">
                   <div class="rank">${pad2(i + 1)}</div>
-                  ${catSticker(p.cat, { size: 84, key: p.id })}
+                  ${catSticker(p.cat, { size: 96, key: p.id })}
                   <div class="nm">${esc(p.name)}</div>
                   <div class="xp">${p.xp || 0} XP</div>
                   ${tag(`${TEXT.end.chaos}: ${i === 0 ? 100 : pick('chaos' + p.id, 60, 99)}%`, i === 0 ? 'surprise' : 'lavender', 'chaos' + p.id)}
@@ -837,7 +849,7 @@ class Player {
             <h1 class="display">${TEXT.lobby.pickCat}</h1>
             ${late ? `<p class="body" style="margin:0">${esc(TEXT.lobby.gameOn)}</p>` : ''}
             <div class="cat-grid">
-              ${CATS.map((c) => `<button type="button" class="cat-tile" data-cat="${c.id}">${catSticker(c.id, { size: 72, key: 'tile' + c.id })}${tag(c.label, 'cobalt', 'tile' + c.id)}</button>`).join('')}
+              ${CATS.map((c) => `<button type="button" class="cat-tile" data-cat="${c.id}">${catSticker(c.id, { size: 96, key: 'tile' + c.id })}${tag(c.baked ? TEXT.lobby.taken : c.label, 'cobalt', 'tile' + c.id, c.baked ? 'hidden' : '')}</button>`).join('')}
             </div>
             <label class="field"><span class="label">${esc(TEXT.lobby.nameLabel)}</span><input class="input name" maxlength="16" autocomplete="off" enterkeyhint="go" placeholder="Имя"></label>`,
           bottom: `<button class="btn block join" disabled>${esc(TEXT.lobby.join)}</button>`,
@@ -851,7 +863,12 @@ class Player {
             t.classList.toggle('taken', isTaken);
             t.disabled = isTaken;
             const tg = $('.tag', t);
-            if (tg) { $('.tag-in', tg).textContent = isTaken ? TEXT.lobby.taken : CAT_BY_ID[t.dataset.cat].label; tg.classList.toggle('ink', isTaken); }
+            if (tg) {
+              const c = CAT_BY_ID[t.dataset.cat];
+              $('.tag-in', tg).textContent = isTaken ? TEXT.lobby.taken : c.label;
+              tg.classList.toggle('ink', isTaken);
+              tg.classList.toggle('hidden', !!c.baked && !isTaken);
+            }
             $('.sticker', t).classList.toggle('taken', isTaken);
             if (isTaken && picked === t.dataset.cat) picked = null;
             t.classList.toggle('picked', picked === t.dataset.cat);
@@ -892,7 +909,7 @@ class Player {
             ${doodle('star', 'right:-6px;top:-10px;width:48px;height:48px', 'surprise twinkle')}
             <h1 class="display">${TEXT.lobby.joined}</h1>
             <p class="body" style="margin:0">${esc(TEXT.lobby.lookUp)}</p>
-            <div class="avatar pop" style="margin-top:12px">${catSticker(me.cat, { size: 180, key: me.id, splash: 'burst', idle: true })}${tag(CAT_BY_ID[me.cat].label, 'cobalt', me.id + ':label')}<div class="name">${esc(me.name)}</div></div>
+            <div class="avatar pop" style="margin-top:12px">${catSticker(me.cat, { size: 200, key: me.id, splash: 'burst', idle: true })}${CAT_BY_ID[me.cat].baked ? '' : tag(CAT_BY_ID[me.cat].label, 'cobalt', me.id + ':label')}<div class="name">${esc(me.name)}</div></div>
             ${hand(TEXT.lobby.noPeek, 3, 'margin-top:12px')}
           </div>`,
           bottom: '',
@@ -1188,7 +1205,7 @@ async function main() {
 
   let store;
   try {
-    store = demo ? (await import('./demo.js')).createDemoStore(params) : await createFirebaseStore();
+    store = demo ? (await import('./demo.js?v=3')).createDemoStore(params) : await createFirebaseStore();
   } catch (e) {
     console.error(e);
     show('index');

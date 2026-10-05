@@ -2,8 +2,8 @@
 // Фиктивная комната с пятью игроками. Стрелка → двигает фазы, ← возвращает.
 // Можно открыть сразу нужную фазу: ?host&demo&phase=whois_reveal&step=3
 
-import { computeNext } from './app.js';
-import { SCALES } from './content.js';
+import { computeNext } from './app.js?v=3';
+import { SCALES } from './content.js?v=3';
 
 const PLAYERS = {
   p1: { name: 'Наташа', cat: 'grin',   joinedAt: 1, xp: 0 },
