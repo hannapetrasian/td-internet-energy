@@ -1,7 +1,7 @@
 // T&D Internet Energy — роутинг, состояние, подписки, рендер фаз.
 // Статика без сборщика. ESM. Firebase подключается динамически, демо-режим без сети.
 
-import { SCALES, WHOIS, MANUAL, CATS, CAT_BY_ID, MAX_PLAYERS, PHASE_ACCENT, TEXT } from './content.js?v=5';
+import { SCALES, WHOIS, MANUAL, CATS, CAT_BY_ID, MAX_PLAYERS, PHASE_ACCENT, TEXT } from './content.js?v=6';
 
 /* ============================================================
    Утилиты
@@ -166,7 +166,7 @@ function flyTag(container, text, color) {
    ============================================================ */
 
 async function createFirebaseStore() {
-  const { firebaseConfig } = await import('./config.js?v=5');
+  const { firebaseConfig } = await import('./config.js?v=6');
   const [{ initializeApp }, db] = await Promise.all([
     import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
     import('https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js'),
@@ -728,7 +728,7 @@ class Host {
                   ${doodle('crown', 'right:-40px;top:-70px;width:80px;height:70px', 'surprise twinkle')}
                   ${doodle('heart', 'right:-110px;top:40px;width:44px;height:44px', 'accent float')}
                 </div>
-                ${hand(TEXT.end.goodIdea, 2, 'justify-self:start')}
+                ${hand(TEXT.lobby.tagline, 2, 'justify-self:start')}
               </div>
               <div class="right">
                 <div class="card qr-card"><canvas class="qr" width="150" height="150"></canvas></div>
@@ -1212,7 +1212,7 @@ async function main() {
 
   let store;
   try {
-    store = demo ? (await import('./demo.js?v=5')).createDemoStore(params, computeNext) : await createFirebaseStore();
+    store = demo ? (await import('./demo.js?v=6')).createDemoStore(params, computeNext) : await createFirebaseStore();
   } catch (e) {
     console.error(e);
     show('index');

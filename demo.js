@@ -3,7 +3,7 @@
 // Можно открыть сразу нужную фазу: ?host&demo&phase=whois_reveal&step=3
 
 // computeNext приходит из app.js параметром: без обратного импорта app.js не может загрузиться дважды
-import { SCALES } from './content.js?v=5';
+import { SCALES } from './content.js?v=6';
 
 const PLAYERS = {
   p1: { name: 'Наташа', cat: 'grin',   joinedAt: 1, xp: 0 },

@@ -57,7 +57,7 @@ export const TEXT = {
   title: 'СВОИ КОТЫ',                // название игры, большой заголовок лобби
   titleLines: ['СВОИ', 'КОТЫ'],      // то же, построчно для лобби ведущего
   lobby: {
-    tagline: 'same team, new level',
+    tagline: 'cool team, cool cats',
     inGame: 'В ИГРЕ',
     start: 'Начать',
     needTwo: 'Нужно хотя бы двое',
@@ -125,9 +125,9 @@ export const TEXT = {
     title: 'ТЕПЕРЬ ТОЧНО СВОИ',
     // Титулы в финале: каждому свой, без мест и очков. Порядок сдвигается по коду комнаты.
     titles: ['T&D LEGEND', 'EMERGING LOVE', 'CHIEF VIBE OFFICER', 'HEAD OF GOOD IDEAS', 'TEAM ENERGY SOURCE', 'OFFICIALLY ONE OF US', 'CERTIFIED TEAMMATE', 'LEARNING MODE: ON'],
-    thanks: 'Спасибо, что сыграли',
+    thanks: 'Спасибо, командушка',
     gallery: 'Галерея',
-    goodIdea: 'same team, new level',
+    goodIdea: 'спасибо, командушка',
   },
   offline: 'Нет связи, переподключаюсь',
   next: 'Дальше',
