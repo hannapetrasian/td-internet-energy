@@ -54,14 +54,16 @@ function setAccent(phase) {
    Компоненты (строки HTML)
    ============================================================ */
 
-function catSticker(catId, { size, key = catId, cls = '', pop = null } = {}) {
+function catSticker(catId, { size, key = catId, cls = '', pop = null, splash = null, idle = false } = {}) {
   const cat = CAT_BY_ID[catId] || CATS[0];
   const style = `--tilt:${tiltFor('cat:' + key)}deg;${size ? `--size:${size}px;` : ''}${pop !== null ? `--i:${pop};` : ''}`;
-  return `<span class="sticker cat ${cls} ${pop !== null ? 'pop' : ''}" style="${style}"><img src="assets/cats/${cat.file}" alt="${cat.emoji}" draggable="false"></span>`;
+  const splashEl = splash ? `<span class="splash ${splash === 'blob' ? 'blob' : ''}" style="--splash-rot:${tiltFor('splash:' + key, 20)}deg"></span>` : '';
+  return `<span class="sticker cat ${cls} ${pop !== null ? 'pop' : ''} ${idle ? 'idle' : ''}" style="${style}">${splashEl}<img src="assets/cats/${cat.file}" alt="${cat.emoji}" draggable="false"></span>`;
 }
 
 function tag(text, color = '', key = text, extra = '') {
-  return `<span class="tag ${color} ${extra}" style="--tilt:${tiltFor('tag:' + key, 4)}deg">${esc(text)}</span>`;
+  const v = 1 + Math.floor(hash('brush:' + key) * 3);
+  return `<span class="tag ${color} ${extra}" data-v="${v}" style="--tilt:${tiltFor('tag:' + key, 4)}deg"><span class="tag-in">${esc(text)}</span></span>`;
 }
 
 function avatar(p, { size, color = '', name = true, label = true, pop = null, key = p.id } = {}) {
@@ -85,6 +87,7 @@ function manualCard(p, manual, { rot = 0, key = p.id } = {}) {
     return `<div class="row"><div class="k">${esc(m.label)}</div><div class="v ${v ? '' : 'empty'}">${v ? esc(v) : '—'}</div></div>`;
   }).join('');
   return `<div class="card mcard" style="--rot:${rot}deg">
+    <span class="tape" style="--tape-color:var(--${hash('tape:' + key) > 0.5 ? 'yellow' : 'lavender'})"></span><span class="tape r"></span>
     <div class="who">${catSticker(p.cat, { key })}<h3 class="display">${esc(p.name)}</h3></div>
     <div class="rows">${rows}</div>
     <div class="status">${tag(TEXT.gallery.approved, 'yellow', key + ':approved')}</div>
@@ -444,9 +447,10 @@ class Host {
             <div class="left">
               <div class="title-wrap">
                 <h1 class="display">T&amp;D<br>INTERNET<br>ENERGY</h1>
-                ${doodle('oval', 'left:-44px;top:186px;width:410px;height:160px', '')}
+                ${doodle('oval', 'left:-44px;top:186px;width:410px;height:160px', 'draw')}
                 ${hand(TEXT.lobby.tagline, -4)}
-                ${doodle('star', 'left:430px;top:-30px;width:72px;height:72px', 'surprise')}
+                ${doodle('star', 'left:430px;top:-30px;width:72px;height:72px', 'surprise twinkle')}
+                ${doodle('heart', 'left:880px;top:214px;width:36px;height:36px', 'accent float')}
               </div>
               <div class="code-wrap">
                 <span class="label muted">Код комнаты</span>
@@ -455,8 +459,9 @@ class Host {
               </div>
             </div>
             <div class="right">
-              ${doodle('arrow', 'left:-150px;top:120px;width:160px;height:100px;transform:rotate(-20deg)', '')}
-              <div class="card qr-card"><canvas class="qr" width="280" height="280"></canvas><div class="qr-caption label">Наведи камеру</div></div>
+              ${[0, 1, 2, 3].map((i) => doodle('paw', `left:${-470 + i * 95}px;top:${300 - i * 22 + (i % 2) * 18}px;width:34px;height:34px;--rot:${18 + i * 6}deg;--i:${i}`, 'fill paw-step')).join('')}
+              ${doodle('arrow', 'left:-150px;top:120px;width:160px;height:100px;transform:rotate(-20deg)', 'draw')}
+              <div class="card qr-card"><span class="tape tl"></span><span class="tape tr"></span><canvas class="qr" width="280" height="280"></canvas><div class="qr-caption label">Наведи камеру</div></div>
             </div>
             <div class="players"></div>
           </div></div>
@@ -489,11 +494,13 @@ class Host {
           ${hostTop({ code: this.code, mid: tag(`ROUND ${pad2(step + 1)} / ${pad2(SCALES.length)}`, 'surprise', 'round' + step) })}
           <div class="h-main"><div class="h-scales">
             <div class="q">
+              ${doodle('bolt', 'right:-120px;top:-10px;width:64px;height:96px', 'accent float')}
               <h1 class="display">${esc(sc.q)}</h1>
               ${hand(TEXT.scales.noRight, 2, 'justify-self:start;margin-left:8px')}
             </div>
             <div class="track-wrap">
-              ${doodle('sparks', 'right:40px;top:-120px;width:90px;height:90px', 'surprise')}
+              ${doodle('sparks', 'right:40px;top:-120px;width:90px;height:90px', 'surprise twinkle')}
+              
               <div class="track"></div>
               <div class="ends"><div class="end l">${esc(sc.left)}</div><div class="end r">${esc(sc.right)}</div></div>
             </div>
@@ -542,13 +549,14 @@ class Host {
           <div class="h-main"><div class="h-whois-intro">
             <div class="left">
               <h1 class="display xl">${TEXT.whois.title}</h1>
+              ${doodle('qmark', 'left:520px;top:-70px;width:90px;height:110px', 'surprise draw')}
               <div class="rules">
                 ${TEXT.whois.rules.map((r, i) => `<div class="rule">${tag(pad2(i + 1), 'ink', 'rule' + i)}<span>${esc(r)}</span></div>`).join('')}
               </div>
               ${hand(TEXT.whois.keepCalm, -3, 'margin-top:40px')}
             </div>
             <div class="qs">
-              ${doodle('arrow-loop', 'left:-140px;top:-10px;width:150px;height:110px', 'surprise')}
+              ${doodle('arrow-loop', 'left:-140px;top:-10px;width:150px;height:110px', 'surprise draw')}
               ${WHOIS.map((q, i) => `<div class="card"><span class="label muted">Вопрос ${i + 1}</span>${esc(q)}</div>`).join('')}
             </div>
           </div></div>
@@ -578,9 +586,10 @@ class Host {
             <div class="h-vote">
               <div class="qline">${esc(q)}</div>
               <div class="answer-wrap">
-                ${doodle('sparks', 'left:-70px;top:-90px;width:110px;height:110px', 'surprise')}
-                ${doodle('arrow', 'right:-150px;bottom:-40px;width:150px;height:95px;transform:scaleX(-1) rotate(20deg)', '')}
+                ${doodle('sparks', 'left:-70px;top:-90px;width:110px;height:110px', 'surprise twinkle')}
+                ${doodle('arrow', 'right:-150px;bottom:-40px;width:150px;height:95px;transform:scaleX(-1) rotate(20deg)', 'draw')}
                 <div class="card answer-card">
+                  <span class="tape" style="left:calc(50% - 55px);transform:rotate(-3deg)"></span>
                   <span class="quote">“</span>
                   <h1 class="display">${esc(text)}</h1>
                   <span class="quote close">”</span>
@@ -607,9 +616,9 @@ class Host {
               ${st.undetectable ? `<div>${tag(`${TEXT.whois.undetectable} +20 XP`, 'surprise', 'undet' + step, 'lg')}</div>` : ''}
             </div>
             <div class="author">
-              ${doodle('sparks', 'left:60px;top:-30px;width:110px;height:110px', 'surprise')}
-              ${doodle('star', 'right:40px;top:30px;width:64px;height:64px', '')}
-              <div class="avatar ${animate ? 'pop' : ''}" style="--i:0">${catSticker(ap.cat, { size: 300, key: ap.id })}${tag(TEXT.whois.author, 'coral', 'author' + step)}</div>
+              ${doodle('exclaim', 'left:40px;top:-20px;width:120px;height:100px', 'accent twinkle')}
+              ${doodle('star', 'right:40px;top:30px;width:64px;height:64px', 'surprise twinkle')}
+              <div class="avatar ${animate ? 'pop' : ''}" style="--i:0">${catSticker(ap.cat, { size: 300, key: ap.id, splash: 'burst', idle: true })}${tag(TEXT.whois.author, 'coral', 'author' + step)}</div>
               <h1 class="display">${esc(ap.name)}</h1>
               <div class="tell">${esc(TEXT.whois.tell(ap.name))}</div>
             </div>
@@ -646,7 +655,9 @@ class Host {
             <div class="left">
               <h1 class="display">${TEXT.manual.title}</h1>
               ${hand(TEXT.manual.tagline, -3, 'justify-self:start')}
-              ${doodle('underline', 'left:4px;top:232px;width:330px;height:34px', 'accent')}
+              ${doodle('underline', 'left:4px;top:232px;width:330px;height:34px', 'accent draw')}
+              ${doodle('heart', 'left:420px;top:250px;width:54px;height:54px', 'surprise float')}
+              ${doodle('sparkle-cluster', 'left:60px;top:330px;width:120px;height:100px', 'surprise twinkle')}
             </div>
             <div class="list">
               ${MANUAL.map((m, i) => `<div class="card">${tag(pad2(i + 1), 'ink', 'm' + i)}<span>${esc(m.label)}</span></div>`).join('')}
@@ -673,7 +684,7 @@ class Host {
           main = `<div class="h-gallery-grid">${players.map((p) => manualCard(p, room.manual?.[p.id], { rot: tiltFor('gcard' + p.id, 3) })).join('')}</div>`;
         } else {
           const p = players[step];
-          main = `<div class="h-gallery-one">${doodle('arrow-down', 'left:220px;top:40px;width:80px;height:130px', 'surprise')}${p ? manualCard(p, room.manual?.[p.id], { rot: tiltFor('gcard' + p.id, 2) }) : ''}</div>`;
+          main = `<div class="h-gallery-one">${doodle('arrow-down', 'left:220px;top:40px;width:80px;height:130px', 'surprise draw')}${doodle('sparkle-cluster', 'right:200px;top:60px;width:120px;height:100px', 'twinkle')}${p ? manualCard(p, room.manual?.[p.id], { rot: tiltFor('gcard' + p.id, 2) }) : ''}</div>`;
         }
         const node = el(`<div class="screen">
           ${hostTop({ code, mid: tag(isGrid ? 'GALLERY' : `${step + 1} / ${players.length}`, 'surprise', 'g' + step) })}
@@ -693,7 +704,8 @@ class Host {
             <div class="left">
               <div style="position:relative;display:inline-block">
                 <h1 class="display">${TEXT.end.title}</h1>
-                ${doodle('crown', 'right:-70px;top:-60px;width:80px;height:70px', 'surprise')}
+                ${doodle('crown', 'right:-70px;top:-60px;width:80px;height:70px', 'surprise twinkle')}
+                ${doodle('heart', 'right:-150px;top:10px;width:44px;height:44px', 'accent float')}
               </div>
               ${hand(TEXT.end.goodIdea, 2, 'justify-self:start')}
               <div class="table">
@@ -839,7 +851,7 @@ class Player {
             t.classList.toggle('taken', isTaken);
             t.disabled = isTaken;
             const tg = $('.tag', t);
-            if (tg) { tg.textContent = isTaken ? TEXT.lobby.taken : CAT_BY_ID[t.dataset.cat].label; tg.classList.toggle('ink', isTaken); }
+            if (tg) { $('.tag-in', tg).textContent = isTaken ? TEXT.lobby.taken : CAT_BY_ID[t.dataset.cat].label; tg.classList.toggle('ink', isTaken); }
             $('.sticker', t).classList.toggle('taken', isTaken);
             if (isTaken && picked === t.dataset.cat) picked = null;
             t.classList.toggle('picked', picked === t.dataset.cat);
@@ -877,10 +889,10 @@ class Player {
         const node = this.frame({
           mid: tag('LOBBY', 'surprise', 'lobby'),
           main: `<div class="p-center">
-            ${doodle('star', 'right:-6px;top:-10px;width:48px;height:48px', 'surprise')}
+            ${doodle('star', 'right:-6px;top:-10px;width:48px;height:48px', 'surprise twinkle')}
             <h1 class="display">${TEXT.lobby.joined}</h1>
             <p class="body" style="margin:0">${esc(TEXT.lobby.lookUp)}</p>
-            <div class="avatar pop" style="margin-top:12px">${catSticker(me.cat, { size: 180, key: me.id })}${tag(CAT_BY_ID[me.cat].label, 'cobalt', me.id + ':label')}<div class="name">${esc(me.name)}</div></div>
+            <div class="avatar pop" style="margin-top:12px">${catSticker(me.cat, { size: 180, key: me.id, splash: 'burst', idle: true })}${tag(CAT_BY_ID[me.cat].label, 'cobalt', me.id + ':label')}<div class="name">${esc(me.name)}</div></div>
             ${hand(TEXT.lobby.noPeek, 3, 'margin-top:12px')}
           </div>`,
           bottom: '',
@@ -1005,7 +1017,7 @@ class Player {
           mid: tag(`${TEXT.whois.answer} ${step + 1} / ${order.length}`, 'surprise', 'a' + step),
           main: `<div class="p-center" style="margin-top:0">
             <span class="label muted">${TEXT.whois.author}</span>
-            <div class="avatar pop" style="--i:0">${catSticker(ap.cat, { size: 160, key: ap.id })}<div class="name" style="font-family:var(--font-display);font-size:28px;font-weight:400;text-transform:uppercase;max-width:none">${esc(ap.name)}</div></div>
+            <div class="avatar pop" style="--i:0">${catSticker(ap.cat, { size: 160, key: ap.id, splash: 'burst', idle: true })}<div class="name" style="font-family:var(--font-display);font-size:28px;font-weight:400;text-transform:uppercase;max-width:none">${esc(ap.name)}</div></div>
             <div class="result" style="min-height:40px"></div>
             ${this.xpBlock(me.xp || 0)}
           </div>`,
@@ -1089,7 +1101,7 @@ class Player {
           main: `<div class="p-center">
             ${doodle('crown', 'right:-4px;top:-58px;width:56px;height:50px', 'surprise')}
             <h1 class="display">${TEXT.end.title}</h1>
-            <div class="avatar pop">${catSticker(me.cat, { size: 150, key: me.id })}${tag(`${TEXT.end.chaos}: ${place === 1 ? 100 : pick('chaos' + me.id, 60, 99)}%`, place === 1 ? 'surprise' : 'lavender', 'chaos' + me.id)}</div>
+            <div class="avatar pop">${catSticker(me.cat, { size: 150, key: me.id, splash: 'blob', idle: true })}${tag(`${TEXT.end.chaos}: ${place === 1 ? 100 : pick('chaos' + me.id, 60, 99)}%`, place === 1 ? 'surprise' : 'lavender', 'chaos' + me.id)}</div>
             <div class="xp-big">${me.xp || 0} XP</div>
             <div class="body">Место ${place} из ${ranked.length}</div>
             ${hand(TEXT.end.goodIdea, -3)}

@@ -23,6 +23,13 @@
   --font-display: 'Anton', 'Oswald', 'Arial Narrow', Impact, sans-serif; /* Anton без кириллицы: кириллица из Oswald 700 */
   --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
   --font-hand: 'Caveat', 'Comic Sans MS', cursive;
+
+  /* Формы мазков для лейблов и всплесков за котами */
+  --brush-1: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 60' preserveAspectRatio='none'><path fill='%23000' d='M6 14 C 30 4, 90 2, 194 10 C 200 24, 198 42, 192 54 C 120 60, 40 58, 8 52 C 2 40, 0 24, 6 14 Z'/></svg>");
+  --brush-2: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 60' preserveAspectRatio='none'><path fill='%23000' d='M4 10 C 60 0, 150 6, 196 6 C 199 20, 196 40, 194 56 C 130 56, 60 62, 6 56 C 0 44, 3 26, 4 10 Z'/></svg>");
+  --brush-3: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 60' preserveAspectRatio='none'><path fill='%23000' d='M8 8 C 70 6, 130 0, 192 8 C 198 18, 194 36, 196 52 C 150 60, 50 54, 10 58 C 3 46, 6 24, 8 8 Z'/></svg>");
+  --splash-burst: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path fill='%23000' d='M50 2 L58 22 L76 8 L74 30 L96 26 L82 44 L100 54 L80 62 L92 84 L68 76 L62 98 L50 80 L36 98 L32 76 L8 84 L20 62 L0 54 L18 44 L4 26 L26 30 L24 8 L42 22 Z'/></svg>");
+  --splash-blob: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path fill='%23000' d='M50 4 C 72 2, 94 16, 96 40 C 98 64, 84 92, 56 96 C 30 100, 6 82, 4 56 C 2 30, 24 6, 50 4 Z'/></svg>");
 }
 
 /* Доминирующий акцент фазы и акцент-сюрприз */
@@ -137,12 +144,27 @@ a { color: inherit; }
 }
 .host { --o: 3px; --od: 2.25px; }
 
-.sticker.cat img { width: var(--size, 96px); height: var(--size, 96px); }
+.sticker.cat { position: relative; }
+.sticker.cat img { position: relative; width: var(--size, 96px); height: var(--size, 96px); }
+.sticker.cat .splash {
+  position: absolute;
+  inset: -16%;
+  background: var(--splash-color, var(--surprise));
+  -webkit-mask: var(--splash-burst) center / 100% 100% no-repeat;
+  mask: var(--splash-burst) center / 100% 100% no-repeat;
+  transform: rotate(var(--splash-rot, 8deg));
+}
+.sticker.cat .splash.blob {
+  inset: -10%;
+  -webkit-mask: var(--splash-blob) center / 100% 100% no-repeat;
+  mask: var(--splash-blob) center / 100% 100% no-repeat;
+}
 .sticker.cat.taken img { filter: grayscale(1) opacity(0.45); }
 
-/* Лейбл-стикер */
+/* Лейбл-стикер: мазок кисти. Внешний слой — обводка и наклон, внутренний — цвет и форма мазка. */
 .tag {
   display: inline-block;
+  max-width: 100%;
   font-family: var(--font-display);
   font-weight: 700;
   font-synthesis: none;
@@ -150,11 +172,8 @@ a { color: inherit; }
   line-height: 1;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  padding: 7px 10px 6px;
-  background: var(--tag-bg, var(--accent));
   color: var(--tag-fg, var(--on-accent));
   transform: rotate(var(--tilt, -3deg));
-  white-space: nowrap;
   filter:
     drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff)
     drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff)
@@ -162,9 +181,25 @@ a { color: inherit; }
     drop-shadow(1.5px -1.5px 0 #fff) drop-shadow(-1.5px 1.5px 0 #fff)
     drop-shadow(0 3px 0 rgba(24, 24, 24, 0.22));
 }
-.host .tag { font-size: 20px; padding: 9px 14px 8px; }
-.host .tag.lg { font-size: 28px; padding: 12px 18px 10px; }
-.tag.sm { font-size: 14px; padding: 6px 8px 5px; }
+.tag-in {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 9px 16px 8px;
+  background: var(--tag-bg, var(--accent));
+  -webkit-mask: var(--brush, var(--brush-1)) 0 0 / 100% 100% no-repeat;
+  mask: var(--brush, var(--brush-1)) 0 0 / 100% 100% no-repeat;
+}
+.tag[data-v="2"] .tag-in { --brush: var(--brush-2); }
+.tag[data-v="3"] .tag-in { --brush: var(--brush-3); }
+.host .tag { font-size: 20px; }
+.host .tag .tag-in { padding: 11px 20px 10px; }
+.host .tag.lg { font-size: 28px; }
+.host .tag.lg .tag-in { padding: 14px 26px 12px; }
+.tag.sm { font-size: 14px; }
+.tag.sm .tag-in { padding: 7px 12px 6px; }
 .tag.cobalt   { --tag-bg: var(--cobalt);   --tag-fg: #fff; }
 .tag.coral    { --tag-bg: var(--coral);    --tag-fg: #fff; }
 .tag.lime     { --tag-bg: var(--lime);     --tag-fg: var(--ink); }
@@ -205,6 +240,28 @@ a { color: inherit; }
 }
 .host .card { padding: 36px 40px; }
 
+/* Полоски скотча на карточках */
+.tape {
+  position: absolute;
+  width: 84px;
+  height: 24px;
+  top: -11px;
+  left: 28px;
+  background: var(--tape-color, var(--yellow));
+  opacity: 0.8;
+  mix-blend-mode: multiply;
+  transform: rotate(-5deg);
+  pointer-events: none;
+  background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.18) 0 2px, transparent 2px 7px);
+}
+.tape.r { left: auto; right: 24px; top: auto; bottom: -11px; transform: rotate(4deg); --tape-color: var(--coral); }
+.mcard .tape.r { right: auto; left: 40px; }
+.tape.tl { left: -18px; top: 18px; transform: rotate(-42deg); }
+.tape.tr { left: auto; right: -18px; top: 18px; transform: rotate(42deg); --tape-color: var(--lavender); }
+.host .tape { width: 110px; height: 30px; top: -14px; }
+.host .tape.r { top: auto; bottom: -14px; }
+.card { position: relative; }
+
 /* ---------- Кнопки ---------- */
 
 .btn {
@@ -238,6 +295,10 @@ a { color: inherit; }
   transition-timing-function: ease-out;
   transform: translateY(3px);
   box-shadow: 0 1px 0 var(--ink);
+}
+@media (hover: hover) {
+  .btn:not(:disabled):not(.secondary):hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--ink); }
+  .btn:not(:disabled):not(.secondary):hover:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
 }
 .btn:disabled {
   cursor: not-allowed;
@@ -315,6 +376,27 @@ a { color: inherit; }
 .doodle use { vector-effect: non-scaling-stroke; }
 .doodle.accent { stroke: var(--accent); }
 .doodle.surprise { stroke: var(--surprise); }
+.doodle.fill { fill: var(--ink); stroke-width: 0; }
+.doodle.fill.accent { fill: var(--accent); }
+.doodle.fill.surprise { fill: var(--surprise); }
+
+/* Линия рисуется при появлении экрана */
+.doodle.draw use { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1100ms var(--ease-out) forwards; animation-delay: calc(260ms + var(--i, 0) * 120ms); }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+
+/* Мерцание звезд и искр, покачивание сердечек */
+.doodle.twinkle { transform-origin: center; animation: twinkle 2.8s ease-in-out infinite; animation-delay: calc(var(--i, 0) * 400ms); }
+@keyframes twinkle { 0%, 100% { transform: scale(0.88) rotate(-6deg); opacity: 0.75; } 50% { transform: scale(1.1) rotate(6deg); opacity: 1; } }
+.doodle.float { animation: floaty 4.2s ease-in-out infinite; animation-delay: calc(var(--i, 0) * 500ms); }
+@keyframes floaty { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
+
+/* Крупный кот чуть дышит */
+.sticker.cat.idle { animation: idle 5s ease-in-out infinite; }
+@keyframes idle { 0%, 100% { transform: rotate(calc(var(--tilt, -3deg) - 1.5deg)) scale(1); } 50% { transform: rotate(calc(var(--tilt, -3deg) + 1.5deg)) scale(1.025); } }
+
+/* Лапки появляются одна за другой */
+.doodle.paw-step { opacity: 0; animation: paw-step 380ms var(--spring) forwards; animation-delay: calc(500ms + var(--i, 0) * 260ms); }
+@keyframes paw-step { from { opacity: 0; transform: scale(0.4) rotate(var(--rot, 0deg)); } to { opacity: 1; transform: scale(1) rotate(var(--rot, 0deg)); } }
 
 /* ---------- Анимации ---------- */
 
@@ -436,7 +518,7 @@ a { color: inherit; }
 .h-lobby .code { font-family: var(--font-display); font-size: 96px; line-height: 1; letter-spacing: 0.12em; }
 .h-lobby .url { font-weight: 800; font-size: 30px; word-break: break-all; }
 .h-lobby .right { display: grid; align-content: start; justify-items: center; position: relative; }
-.h-lobby .qr-card { padding: 24px; transform: rotate(2deg); }
+.h-lobby .qr-card { padding: 24px; transform: rotate(2deg); margin-top: 14px; }
 .h-lobby .qr-card canvas, .h-lobby .qr-card img { width: 280px; height: 280px; }
 .h-lobby .qr-caption { margin-top: 14px; text-align: center; }
 .h-lobby .players { grid-column: 1 / -1; display: flex; gap: 48px; align-items: flex-end; min-height: 200px; padding-left: 8px; }
@@ -444,7 +526,7 @@ a { color: inherit; }
 
 /* Шкалы */
 .h-scales { display: grid; grid-template-rows: auto 1fr; gap: 24px; height: 100%; }
-.h-scales .q { display: grid; gap: 14px; max-width: 1500px; }
+.h-scales .q { display: grid; gap: 14px; max-width: 1500px; position: relative; justify-self: start; }
 .h-scales .q .display { font-size: 80px; }
 .h-scales .track-wrap { position: relative; align-self: end; padding: 0 120px 88px; }
 .h-scales .track { position: relative; height: 6px; background: var(--ink); border-radius: 3px; }
@@ -574,7 +656,10 @@ a { color: inherit; }
   transition: transform 180ms var(--spring), opacity 180ms ease;
 }
 .cat-grid .cat-tile .sticker.cat { --size: 72px; }
-.cat-grid .cat-tile .tag { font-size: 10px; padding: 4px 6px 3px; display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.cat-grid .cat-tile { min-width: 0; width: 100%; }
+.cat-grid .cat-tile .tag { font-size: 10px; display: block; width: 100%; }
+.cat-grid .cat-tile .tag .tag-in { padding: 5px 8px 4px; text-align: center; }
+.vote-grid .vote-tile { min-width: 0; width: 100%; }
 .cat-grid.has-pick .cat-tile:not(.picked):not(.taken) { opacity: 0.45; }
 .cat-grid .cat-tile.picked { transform: scale(1.12); }
 .cat-grid .cat-tile.taken { opacity: 0.5; cursor: not-allowed; }
@@ -648,10 +733,14 @@ a { color: inherit; }
   .fly-up { animation: fade-out 600ms ease both; }
   .h-scales .pin { transition: none; }
   .btn, .cat-grid .cat-tile, .vote-grid .vote-tile { transition: none; }
+  .doodle.draw use { animation: none; stroke-dashoffset: 0; }
+  .doodle.twinkle, .doodle.float, .sticker.cat.idle { animation: none; }
+  .doodle.paw-step { animation: none; opacity: 1; }
 }
 
 /* Для скриншотов: ?still — все анимации в конечном состоянии */
 .still *, .still *::before, .still *::after { animation-duration: 0s !important; animation-delay: 0s !important; transition: none !important; }
+.still .doodle.twinkle, .still .doodle.float, .still .sticker.cat.idle { animation: none !important; }
 
 /* Карточка инструкции на телефоне: лейблы мельче */
 .phone .mcard .row .k { font-size: 11px; }
